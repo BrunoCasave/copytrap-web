@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101e29">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="application-name" content="コピートラップ">
+  <meta name="apple-mobile-web-app-title" content="コピートラップ">
+  <title>コピートラップ</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101e29;overscroll-behavior:none}
+    #game{position:fixed;inset:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    canvas{display:block;width:100%;height:100%;background:#101e29;touch-action:none;outline:none;-webkit-touch-callout:none}
+    #cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;background:#101e29;color:#f4e7c3}
+    #cover[hidden]{display:none}svg{width:100px;height:80px}progress{width:180px;height:6px;accent-color:#80e0d7;border:0}
+    button{width:88px;height:72px;border:2px solid #80e0d7;border-radius:18px;background:#192c39;color:#f4e7c3;font-size:34px;touch-action:manipulation;cursor:pointer}
+    button:focus-visible{outline:3px solid #f4e7c3;outline-offset:5px}button[hidden]{display:none}
+  </style>
+</head>
+<body>
+<main id="game">
+  <canvas id="unity-canvas" tabindex="0" aria-label="コピートラップ、ゲーム画面"></canvas>
+  <div id="cover" role="status" aria-label="ゲームを読み込み中">
+    <svg viewBox="0 0 100 80" aria-hidden="true"><rect x="5" y="23" width="29" height="38" rx="12" fill="#f4e7c3"/><path d="M65 24h25v37H65z" fill="none" stroke="#80e0d7" stroke-width="4"/><path d="M41 42h15m-5-5 5 5-5 5" fill="none" stroke="#f0f7f2" stroke-width="3"/><path d="M15 36v4m9-4v4" stroke="#101e29" stroke-width="3"/></svg>
+    <progress id="progress" max="1" value="0" aria-label="読み込み状況"></progress>
+    <button id="start" hidden aria-label="ゲームを始める">▶</button>
+    <button id="retry" hidden aria-label="読み込みをやり直す">↻</button>
+  </div>
+</main>
+<script src="progress.js"></script>
+<script src="lifecycle.js"></script>
+<script>
+  const canvas=document.getElementById('unity-canvas');
+  const cover=document.getElementById('cover');
+  const progress=document.getElementById('progress');
+  const start=document.getElementById('start');
+  const retry=document.getElementById('retry');
+  const fail=error=>{console.error(error);cover.hidden=false;progress.hidden=true;start.hidden=true;retry.hidden=false;cover.setAttribute('aria-label','読み込みに失敗しました');};
+  retry.addEventListener('click',()=>location.reload());
+  start.addEventListener('click',()=>{cover.hidden=true;canvas.focus();});
+  canvas.addEventListener('contextmenu',event=>event.preventDefault());
+  canvas.addEventListener('touchmove',event=>event.preventDefault(),{passive:false});
+  canvas.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(event.key))event.preventDefault();});
+  const config={
+    dataUrl:'Build/84d9f6cd27caf07447165be15e5e7b4e.data',frameworkUrl:'Build/994e737cd93bc9315f4db7c44f28f635.framework.js',codeUrl:'Build/4704b469364790f84bb2634f73e516b9.wasm',
+    streamingAssetsUrl:'StreamingAssets',companyName:"EchoPrototype",productName:"あとから、同じ道。 扉",productVersion:"1.0",
+    devicePixelRatio:Math.min(window.devicePixelRatio||1,2),
+    showBanner:(message,type)=>{if(type==='error')fail(message);else console.warn(message);}
+  };
+  const script=document.createElement('script');script.src='Build/775d3898c6fa645acd39ce2a05064737.loader.js';
+  script.onerror=()=>fail('Unable to download the game loader');
+  script.onload=()=>createUnityInstance(canvas,config,value=>{progress.value=value;}).then(instance=>{
+    window.echoUnity=instance;
+    window.echoLifecycle.ready();
+    progress.hidden=true;start.hidden=false;cover.setAttribute('aria-label','ゲームを開始できます');
+  }).catch(fail);
+  document.body.appendChild(script);
+</script>
+</body>
+</html>
