@@ -8,12 +8,17 @@
   <meta name="application-name" content="コピートラップ">
   <meta name="apple-mobile-web-app-title" content="コピートラップ">
   <title>コピートラップ</title>
+  <link rel="preload" href="dotnull-logo.svg" as="image" fetchpriority="high">
   <style>
     *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101e29;overscroll-behavior:none}
     #game{position:fixed;inset:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
     canvas{display:block;width:100%;height:100%;background:#101e29;touch-action:none;outline:none;-webkit-touch-callout:none}
     #cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;background:#101e29;color:#f4e7c3}
     #cover[hidden]{display:none}svg{width:100px;height:80px}progress{width:180px;height:6px;accent-color:#80e0d7;border:0}
+    #brand{position:absolute;inset:0;display:grid;place-items:center;background:#101e29;z-index:2;pointer-events:none}
+    #brand[hidden]{display:none}#brand img{width:min(46vw,95vh,360px);height:auto;animation:brand-in .8s ease both}
+    @keyframes brand-in{0%{opacity:0}14%,81%{opacity:1}100%{opacity:0}}
+    @media(prefers-reduced-motion:reduce){#brand img{animation:none}}
     button{width:88px;height:72px;border:2px solid #80e0d7;border-radius:18px;background:#192c39;color:#f4e7c3;font-size:34px;touch-action:manipulation;cursor:pointer}
     button:focus-visible{outline:3px solid #f4e7c3;outline-offset:5px}button[hidden]{display:none}
   </style>
@@ -27,33 +32,41 @@
     <button id="start" hidden aria-label="ゲームを始める">▶</button>
     <button id="retry" hidden aria-label="読み込みをやり直す">↻</button>
   </div>
+  <div id="brand" role="img" aria-label="dotnull"><img src="dotnull-logo.svg" alt="" fetchpriority="high"></div>
 </main>
 <script src="progress.js"></script>
 <script src="lifecycle.js"></script>
 <script>
+  const bootStarted=performance.now();
   const canvas=document.getElementById('unity-canvas');
   const cover=document.getElementById('cover');
   const progress=document.getElementById('progress');
   const start=document.getElementById('start');
   const retry=document.getElementById('retry');
-  const fail=error=>{console.error(error);cover.hidden=false;progress.hidden=true;start.hidden=true;retry.hidden=false;cover.setAttribute('aria-label','読み込みに失敗しました');};
+  const brand=document.getElementById('brand');
+  let runtimeReady=false;
+  const revealReady=()=>{if(!runtimeReady||!start.hidden)return;brand.hidden=true;progress.hidden=true;start.hidden=false;cover.setAttribute('aria-label','ゲームを開始できます');document.body.dataset.bootReadyMs=(performance.now()-bootStarted).toFixed(1);};
+  // This timer runs alongside download/initialization, never after it.
+  setTimeout(()=>{brand.hidden=true;revealReady();},800);
+  const fail=error=>{console.error(error);runtimeReady=false;brand.hidden=true;cover.hidden=false;progress.hidden=true;start.hidden=true;retry.hidden=false;cover.setAttribute('aria-label','読み込みに失敗しました');};
   retry.addEventListener('click',()=>location.reload());
   start.addEventListener('click',()=>{cover.hidden=true;canvas.focus();});
   canvas.addEventListener('contextmenu',event=>event.preventDefault());
   canvas.addEventListener('touchmove',event=>event.preventDefault(),{passive:false});
   canvas.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(event.key))event.preventDefault();});
   const config={
-    dataUrl:'Build/84d9f6cd27caf07447165be15e5e7b4e.data',frameworkUrl:'Build/994e737cd93bc9315f4db7c44f28f635.framework.js',codeUrl:'Build/4704b469364790f84bb2634f73e516b9.wasm',
+    dataUrl:'Build/0fb6c98c71b45643167171f273983f9c.data',frameworkUrl:'Build/c5c09304c763cc8579d553fe0ae2f9f7.framework.js',codeUrl:'Build/8bab369d158567d583a157b676347c76.wasm',
     streamingAssetsUrl:'StreamingAssets',companyName:"EchoPrototype",productName:"あとから、同じ道。 扉",productVersion:"1.0",
     devicePixelRatio:Math.min(window.devicePixelRatio||1,2),
+    cacheControl:url=>/\/Build\/[a-f0-9]+\.(?:data|wasm)(?:\.br)?$/.test(new URL(url,location.href).pathname)?'immutable':'no-store',
     showBanner:(message,type)=>{if(type==='error')fail(message);else console.warn(message);}
   };
-  const script=document.createElement('script');script.src='Build/775d3898c6fa645acd39ce2a05064737.loader.js';
+  const script=document.createElement('script');script.src='Build/274983173e2d83db6a2faaff112c6204.loader.js';
   script.onerror=()=>fail('Unable to download the game loader');
   script.onload=()=>createUnityInstance(canvas,config,value=>{progress.value=value;}).then(instance=>{
     window.echoUnity=instance;
     window.echoLifecycle.ready();
-    progress.hidden=true;start.hidden=false;cover.setAttribute('aria-label','ゲームを開始できます');
+    runtimeReady=true;document.body.dataset.runtimeReadyMs=(performance.now()-bootStarted).toFixed(1);revealReady();
   }).catch(fail);
   document.body.appendChild(script);
 </script>
