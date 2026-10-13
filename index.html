@@ -54,13 +54,13 @@
   canvas.addEventListener('touchmove',event=>event.preventDefault(),{passive:false});
   canvas.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(event.key))event.preventDefault();});
   const config={
-    dataUrl:'Build/207e2264da7fcdd9e755a0ca7b344e3c.data',frameworkUrl:'Build/52dd14bd005cb9aefd02d413c7c05439.framework.js',codeUrl:'Build/4c6cdf503e9aea9cb5bf6eef385097d5.wasm',
+    dataUrl:'Build/a61ae667d28ca4809710f3b894d86841.data',frameworkUrl:'Build/dce654c1451cebd3656e282f1a259cdb.framework.js',codeUrl:'Build/5b4d9dddadd011d2dd4086ff86710949.wasm',
     streamingAssetsUrl:'StreamingAssets',companyName:"EchoPrototype",productName:"あとから、同じ道。 扉",productVersion:"1.0",
     devicePixelRatio:Math.min(window.devicePixelRatio||1,2),
     cacheControl:url=>/\/Build\/[a-f0-9]+\.(?:data|wasm)(?:\.br)?$/.test(new URL(url,location.href).pathname)?'immutable':'no-store',
     showBanner:(message,type)=>{if(type==='error')fail(message);else console.warn(message);}
   };
-  const script=document.createElement('script');script.src='Build/f5591471570c526286e7100e4c26ca16.loader.js';
+  const script=document.createElement('script');script.src='Build/16e6edf463b71fb4748904da5e933580.loader.js';
   script.onerror=()=>fail('Unable to download the game loader');
   script.onload=()=>createUnityInstance(canvas,config,value=>{progress.value=value;}).then(instance=>{
     window.echoUnity=instance;
