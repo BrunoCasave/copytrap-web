@@ -2,72 +2,27 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101e29">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="application-name" content="コピートラップ">
-  <meta name="apple-mobile-web-app-title" content="コピートラップ">
-  <title>コピートラップ</title>
-  <link rel="preload" href="dotnull-logo.svg" as="image" fetchpriority="high">
-  <style>
-    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101e29;overscroll-behavior:none}
-    #game{position:fixed;inset:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-    canvas{display:block;width:100%;height:100%;background:#101e29;touch-action:none;outline:none;-webkit-touch-callout:none}
-    #cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;background:#101e29;color:#f4e7c3}
-    #cover[hidden]{display:none}svg{width:100px;height:80px}progress{width:180px;height:6px;accent-color:#80e0d7;border:0}
-    #brand{position:absolute;inset:0;display:grid;place-items:center;background:#101e29;z-index:2;pointer-events:none}
-    #brand[hidden]{display:none}#brand img{width:min(46vw,95vh,360px);height:auto;animation:brand-in .8s ease both}
-    @keyframes brand-in{0%{opacity:0}14%,81%{opacity:1}100%{opacity:0}}
-    @media(prefers-reduced-motion:reduce){#brand img{animation:none}}
-    button{width:88px;height:72px;border:2px solid #80e0d7;border-radius:18px;background:#192c39;color:#f4e7c3;font-size:34px;touch-action:manipulation;cursor:pointer}
-    button:focus-visible{outline:3px solid #f4e7c3;outline-offset:5px}button[hidden]{display:none}
-  </style>
+  <meta name="theme-color" content="#0b1927">
+  <meta name="description" content="Copy Trap — 自分は避けた。コピーは？ Steam・iPhone・Android向けトラップアクション。公式サイトはただいま準備中です。">
+  <link rel="canonical" href="https://copytrap.dotnull.co.jp/">
+  <meta property="og:title" content="Copy Trap — Coming Soon">
+  <meta property="og:description" content="Your copy follows one second behind. Coming to Steam, iPhone and Android.">
+  <meta property="og:image" content="https://copytrap.dotnull.co.jp/assets/hero.png">
+  <meta property="og:url" content="https://copytrap.dotnull.co.jp/">
+  <meta property="og:type" content="website">
+  <title>Copy Trap — 公式サイト準備中</title>
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="site.js" defer></script>
 </head>
 <body>
-<main id="game">
-  <canvas id="unity-canvas" tabindex="0" aria-label="コピートラップ、ゲーム画面"></canvas>
-  <div id="cover" role="status" aria-label="ゲームを読み込み中">
-    <svg viewBox="0 0 100 80" aria-hidden="true"><rect x="5" y="23" width="29" height="38" rx="12" fill="#f4e7c3"/><path d="M65 24h25v37H65z" fill="none" stroke="#80e0d7" stroke-width="4"/><path d="M41 42h15m-5-5 5 5-5 5" fill="none" stroke="#f0f7f2" stroke-width="3"/><path d="M15 36v4m9-4v4" stroke="#101e29" stroke-width="3"/></svg>
-    <progress id="progress" max="1" value="0" aria-label="読み込み状況"></progress>
-    <button id="start" hidden aria-label="ゲームを始める">▶</button>
-    <button id="retry" hidden aria-label="読み込みをやり直す">↻</button>
-  </div>
-  <div id="brand" role="img" aria-label="dotnull"><img src="dotnull-logo.svg" alt="" fetchpriority="high"></div>
-</main>
-<script src="lifecycle.js"></script>
-<script>
-  const bootStarted=performance.now();
-  const canvas=document.getElementById('unity-canvas');
-  const cover=document.getElementById('cover');
-  const progress=document.getElementById('progress');
-  const start=document.getElementById('start');
-  const retry=document.getElementById('retry');
-  const brand=document.getElementById('brand');
-  let runtimeReady=false;
-  const revealReady=()=>{if(!runtimeReady||!start.hidden)return;brand.hidden=true;progress.hidden=true;start.hidden=false;cover.setAttribute('aria-label','ゲームを開始できます');document.body.dataset.bootReadyMs=(performance.now()-bootStarted).toFixed(1);};
-  // This timer runs alongside download/initialization, never after it.
-  setTimeout(()=>{brand.hidden=true;revealReady();},800);
-  const fail=error=>{console.error(error);runtimeReady=false;brand.hidden=true;cover.hidden=false;progress.hidden=true;start.hidden=true;retry.hidden=false;cover.setAttribute('aria-label','読み込みに失敗しました');};
-  retry.addEventListener('click',()=>location.reload());
-  start.addEventListener('click',()=>{cover.hidden=true;canvas.focus();});
-  canvas.addEventListener('contextmenu',event=>event.preventDefault());
-  canvas.addEventListener('touchmove',event=>event.preventDefault(),{passive:false});
-  canvas.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(event.key))event.preventDefault();});
-  const config={
-    dataUrl:'Build/a61ae667d28ca4809710f3b894d86841.data',frameworkUrl:'Build/dce654c1451cebd3656e282f1a259cdb.framework.js',codeUrl:'Build/5b4d9dddadd011d2dd4086ff86710949.wasm',
-    streamingAssetsUrl:'StreamingAssets',companyName:"EchoPrototype",productName:"あとから、同じ道。 扉",productVersion:"1.0",
-    devicePixelRatio:Math.min(window.devicePixelRatio||1,2),
-    cacheControl:url=>/\/Build\/[a-f0-9]+\.(?:data|wasm)(?:\.br)?$/.test(new URL(url,location.href).pathname)?'immutable':'no-store',
-    showBanner:(message,type)=>{if(type==='error')fail(message);else console.warn(message);}
-  };
-  const script=document.createElement('script');script.src='Build/16e6edf463b71fb4748904da5e933580.loader.js';
-  script.onerror=()=>fail('Unable to download the game loader');
-  script.onload=()=>createUnityInstance(canvas,config,value=>{progress.value=value;}).then(instance=>{
-    window.echoUnity=instance;
-    window.echoLifecycle.ready();
-    runtimeReady=true;document.body.dataset.runtimeReadyMs=(performance.now()-bootStarted).toFixed(1);revealReady();
-  }).catch(fail);
-  document.body.appendChild(script);
-</script>
+  <header class="wrap"><a class="wordmark" href="#" aria-label="Copy Trap">COPY <span>TRAP</span><i aria-hidden="true"></i></a><nav aria-label="Language"><button type="button" data-lang="ja" aria-pressed="true">JP</button><span aria-hidden="true">/</span><button type="button" data-lang="en" aria-pressed="false">EN</button></nav></header>
+  <main class="wrap">
+    <figure><img src="assets/hero.png" width="3840" height="1646" fetchpriority="high" alt="Copy Trap。本体と1秒遅れて動くコピー。" data-alt="art"></figure>
+    <div class="copy"><p class="eyebrow">COMING SOON</p><h1><span data-copy="line1">自分は避けた。</span><br><span class="accent" data-copy="line2">コピーは？</span></h1><p class="intro" data-copy="intro">1秒遅れて動くコピーと、最後の扉へ。</p><div class="notice"><h2 data-copy="heading">公式サイトは、ただいま準備中。</h2><p data-copy="body">発売情報やゲームの紹介を、ここでお届けします。</p></div><p class="release" data-copy="release">2027年3月 発売予定</p><p class="platforms">Steam <span>·</span> iPhone <span>·</span> Android</p></div>
+  </main>
+  <footer class="wrap"><a href="https://dotnull.co.jp/" target="_blank" rel="noopener noreferrer" aria-label="DOTNULL Co.,Ltd."><img src="assets/dotnull.png" width="1064" height="431" alt="dotnull"></a><a class="contact" href="mailto:copytrap@dotnull.co.jp" data-copy="contact">お問い合わせ ↗</a><small>© DOTNULL Co.,Ltd.</small></footer>
 </body>
 </html>
