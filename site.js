@@ -1,12 +1,10 @@
 (() => {
   'use strict';
   const english = {
-    line1:'You made it.', line2:'Did your copy?',
-    intro:'Reach the final door with a copy that follows one second behind.',
     heading:'Our official website is on its way.',
     body:'Game details and release news will appear here.',
     release:'Planned for March 2027', contact:'Contact ↗',
-    art:'Copy Trap. The player and a copy that follows one second behind.'
+    art:'Copy Trap title artwork'
   };
   const japanese = Object.fromEntries([...document.querySelectorAll('[data-copy]')].map(el => [el.dataset.copy, el.textContent]));
   japanese.art = document.querySelector('[data-alt="art"]').alt;
